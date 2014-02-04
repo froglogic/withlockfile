@@ -123,7 +123,12 @@ int main( int argc, char **argv )
             }
         }
 
-        if ( !::AssignProcessToJobObject( jobObject, pi.hProcess ) ) {
+        /* Don't bother reporting access denied with AssignProcessToJobObject
+         * because it's quite common for this to happen on Windows 7 and
+         * earlier if withlockfile is already part of a job object.
+         */
+        if ( !::AssignProcessToJobObject( jobObject, pi.hProcess ) &&
+             ::GetLastError() != ERROR_ACCESS_DENIED ) {
             throw Win32Error( "AssignProcessToJobObject", ::GetLastError() );
         }
 
