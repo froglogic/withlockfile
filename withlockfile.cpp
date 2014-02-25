@@ -80,7 +80,7 @@ int main( int argc, char **argv )
 
         std::string commandLine = quoteArgument( executable );
         {
-            for ( size_t i = 3; i < argc; ++i ) {
+            for ( int i = 3; i < argc; ++i ) {
                 commandLine += ' ';
                 commandLine += quoteArgument( argv[i] );
             }
