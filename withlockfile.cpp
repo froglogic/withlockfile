@@ -61,8 +61,29 @@ int main( int argc, char **argv )
         OVERLAPPED ol;
         ::ZeroMemory( &ol, sizeof( ol ) );
 
-        if ( !::LockFileEx( f, LOCKFILE_EXCLUSIVE_LOCK, 0, 1, 0, &ol ) ) {
-            throw Win32Error( "LockFileEx", ::GetLastError() );
+        bool lockAcquired = false;
+        for ( int i = 0; i < 15; ++i ) {
+            if ( ::LockFileEx( f,
+                               LOCKFILE_EXCLUSIVE_LOCK | LOCKFILE_FAIL_IMMEDIATELY,
+                               0,
+                               1,
+                               0,
+                               &ol ) ) {
+                lockAcquired = true;
+                break;
+            }
+
+            const DWORD lastError = ::GetLastError();
+            if ( lastError == ERROR_LOCK_VIOLATION ) {
+                ::Sleep( 1000 );
+                continue;
+            } else {
+                throw Win32Error( "LockFileEx", lastError );
+            }
+        }
+
+        if ( !lockAcquired ) {
+            throw Win32Error( "LockFileEx", ERROR_LOCK_VIOLATION );
         }
 
         std::string executable = enforceExeExtension( argv[2] );
