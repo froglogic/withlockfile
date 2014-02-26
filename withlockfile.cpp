@@ -61,28 +61,8 @@ int main( int argc, char **argv )
         OVERLAPPED ol;
         ::ZeroMemory( &ol, sizeof( ol ) );
 
-        /* For some unknown reason, LockFileEx fails with ERROR_NETNAME_DELETED
-         * every now and then. We couldn't determine the reason, let's just
-         * ignore this error for a while if it occurs - maybe it's some
-         * network instability?
-         */
-        {
-            bool lockingSucceeded = false;
-            for ( int i = 0; i < 3; ++i ) {
-                if ( ::LockFileEx( f, LOCKFILE_EXCLUSIVE_LOCK, 0, 1, 0, &ol ) ) {
-                    lockingSucceeded = true;
-                    break;
-                }
-
-                const DWORD errorCode = ::GetLastError();
-                if ( errorCode != ERROR_NETNAME_DELETED ) {
-                    throw Win32Error( "LockFileEx", errorCode );
-                }
-            }
-
-            if ( !lockingSucceeded ) {
-                throw Win32Error( "LockFileEx", ERROR_NETNAME_DELETED );
-            }
+        if ( !::LockFileEx( f, LOCKFILE_EXCLUSIVE_LOCK, 0, 1, 0, &ol ) ) {
+            throw Win32Error( "LockFileEx", ::GetLastError() );
         }
 
         std::string executable = enforceExeExtension( argv[2] );
