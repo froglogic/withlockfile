@@ -62,7 +62,7 @@ int main( int argc, char **argv )
         ::ZeroMemory( &ol, sizeof( ol ) );
 
         bool lockAcquired = false;
-        for ( int i = 0; i < 15; ++i ) {
+        for ( int i = 0; i < 180; ++i ) {
             if ( ::LockFileEx( f,
                                LOCKFILE_EXCLUSIVE_LOCK | LOCKFILE_FAIL_IMMEDIATELY,
                                0,
